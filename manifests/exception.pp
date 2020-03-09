@@ -168,12 +168,12 @@ define windows_firewall::exception(
       $netsh_command = "${netsh_exe} advfirewall firewall ${fw_action} rule name=\"${display_name}\" ${fw_description} dir=${direction} action=${action} enable=${mode} edge=${edge} ${allow_context} remoteip=\"${remote_ip}\""
     }
     #
-    registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules':
+    $parent_keys = ['HKLM\Software\Puppet Labs\Puppet\modules', 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall']
+    registry_key { $parent_keys:
       ensure => $ensure,
     }
-    ~> registry::value { 'netsh_command':
+    ~> registry_value { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall\netsh_command':
       ensure => $ensure,
-      key    => 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall',
       type   => string,
       data   => $netsh_command,
     }
