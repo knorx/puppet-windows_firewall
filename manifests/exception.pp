@@ -178,6 +178,5 @@ define windows_firewall::exception(
       provider   => windows,
       onlyif     => $onlyif,
       unless     => $unless,
-      subscribe  => File["netsh_command_${title}"]
     }
 }
