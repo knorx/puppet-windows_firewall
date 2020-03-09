@@ -171,7 +171,7 @@ define windows_firewall::exception(
     registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules':
       ensure => $ensure,
     }
-    ~> registry_value { 'netsh_command':
+    ~> registry::value { 'netsh_command':
       ensure => $ensure,
       key    => 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall',
       type   => string,
