@@ -31,6 +31,9 @@
 # [*remote_ip*]
 # Specifies remote hosts that can use this rule.
 #
+# [*program*]
+# The program to restrict a rule to. Either absolute path or 'System'.
+#
 # [*local_port*]
 # Specifies that network packets with matching local IP port numbers matched by this rule.
 #
@@ -125,7 +128,9 @@ define windows_firewall::exception(
     } else {
       $fw_command = 'allowedprogram'
       $allow_context = "program=\"${program}\""
-      validate_absolute_path($program)
+      if $program != 'System' {
+        validate_absolute_path($program)
+      }
     }
 
     validate_slength($description,255)
