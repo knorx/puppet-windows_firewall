@@ -166,14 +166,14 @@ define windows_firewall::exception(
       $netsh_command = "${netsh_exe} advfirewall firewall ${fw_action} rule name=\"${display_name}\" ${fw_description} dir=${direction} ${allow_context} remoteip=\"${remote_ip}\""
     } else {
       $netsh_command = "${netsh_exe} advfirewall firewall ${fw_action} rule name=\"${display_name}\" ${fw_description} dir=${direction} action=${action} enable=${mode} edge=${edge} ${allow_context} remoteip=\"${remote_ip}\""
-      file {"netsh_command_${title}":
-        path => "${vardir}/puppet-windows_firewall_${title}",
-        ensure => present,
-        content => $netsh_command,
-      }
     }
     #
-    exec { "set rule ${display_name}":
+    registry_value { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall\netsh_command':
+      ensure => $ensure,
+      type   => string,
+      data   => $netsh_command,
+    }
+    ~> exec { "set rule ${display_name}":
       command    => $netsh_command,
       provider   => windows,
       onlyif     => $onlyif,
