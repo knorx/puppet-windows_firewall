@@ -179,7 +179,7 @@ define windows_firewall::exception(
     ~> registry_value { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall\netsh_command':
       ensure => $ensure,
       type   => string,
-      data   => $netsh_update_command,
+      data   => $netsh_command,
     }
     ~> exec { "clean up existing rule ${display_name}":
       command     => $netsh_delete_command,
