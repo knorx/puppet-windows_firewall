@@ -162,25 +162,39 @@ define windows_firewall::exception(
       false => 'no',
     }
 
+    $netsh_command_front = "${netsh_exe} advfirewall firewall"
+    $netsh_command_shared = "rule name=\"${display_name}\" ${fw_description} dir=${direction}"
+    $netsh_command_program = "action=${action} enable=${mode} edge=${edge}"
+    $netsh_command_back = "${allow_context} remoteip=\"${remote_ip}\""
     if $fw_action == 'delete' and $program == undef {
-      $netsh_command = "${netsh_exe} advfirewall firewall ${fw_action} rule name=\"${display_name}\" ${fw_description} dir=${direction} ${allow_context} remoteip=\"${remote_ip}\""
+      $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_shared} ${netsh_command_back}"
+      $netsh_update_command = "${netsh_command_front} set new ${netsh_command_shared} ${netsh_command_back}"
     } else {
-      $netsh_command = "${netsh_exe} advfirewall firewall ${fw_action} rule name=\"${display_name}\" ${fw_description} dir=${direction} action=${action} enable=${mode} edge=${edge} ${allow_context} remoteip=\"${remote_ip}\""
+      $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
+      $netsh_update_command = "${netsh_command_front} set new ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
     }
     #
-    $parent_keys = ['HKLM\Software\Puppet Labs\Puppet\modules', 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall']
-    registry_key { $parent_keys:
+    exec { "set rule ${display_name}":
+      command    => $netsh_command,
+      provider   => windows,
+      onlyif     => $onlyif,
+      unless     => $unless,
+    }
+    registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules':
+      ensure => present,
+    }
+    ~> registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall':
       ensure => $ensure,
     }
     ~> registry_value { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall\netsh_command':
       ensure => $ensure,
       type   => string,
-      data   => $netsh_command,
+      data   => $netsh_update_command,
     }
-    ~> exec { "set rule ${display_name}":
-      command    => $netsh_command,
-      provider   => windows,
-      onlyif     => $onlyif,
-      unless     => $unless,
+    ~> exec { "update rule ${display_name}":
+      command     => $netsh_update_command,
+      provider    => windows,
+      refreshonly => true,
+      onlyif      => $check_rule_existance,
     }
 }
