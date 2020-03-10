@@ -166,6 +166,7 @@ define windows_firewall::exception(
     $netsh_command_back = "${allow_context} remoteip=\"${remote_ip}\""
     if $fw_action == 'delete' {
       $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name}"
+      $netsh_delete_command = ''
     } else {
       if $program == undef{
         $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name} ${fw_description} ${netsh_command_shared} ${netsh_command_back}"
