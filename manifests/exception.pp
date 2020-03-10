@@ -168,10 +168,10 @@ define windows_firewall::exception(
       $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name}"
     } else {
       if $program == undef{
-        $netsh_command = "${netsh_command_front} ${fw_action} ${fw_description} ${netsh_command_rule_name} ${netsh_command_shared} ${netsh_command_back}"
+        $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name} ${fw_description} ${netsh_command_shared} ${netsh_command_back}"
       }
       else {
-        $netsh_command = "${netsh_command_front} ${fw_action} ${fw_description} ${netsh_command_rule_name} ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
+        $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name} ${fw_description} ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
       }
       $netsh_delete_command = "${netsh_command_front} delete ${netsh_command_rule_name}"
     }
