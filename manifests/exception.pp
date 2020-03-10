@@ -99,8 +99,6 @@ define windows_firewall::exception(
       $local_port_param  = 'localport'
       $remote_port_param = 'remoteport'
 
-      $fw_command = 'portopening'
-
       if $remote_port or $local_port {
         unless $protocol {
           fail 'Sorry, protocol is required, when defining local or remote port'
@@ -126,7 +124,6 @@ define windows_firewall::exception(
         $allow_context = rstrip("protocol=${protocol} ${local_port_cmd} ${remote_port_cmd}")
       }
     } else {
-      $fw_command = 'allowedprogram'
       $allow_context = "program=\"${program}\""
       if $program != 'System' {
         validate_absolute_path($program)
