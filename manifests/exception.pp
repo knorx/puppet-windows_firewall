@@ -160,24 +160,16 @@ define windows_firewall::exception(
     }
 
     $netsh_command_front = "${netsh_exe} advfirewall firewall"
-    $netsh_command_rule_name = "rule name=\"${display_name}\""
-    $netsh_command_shared = "${fw_description} dir=${direction}"
+    $netsh_command_shared = "rule name=\"${display_name}\" ${fw_description} dir=${direction}"
     $netsh_command_program = "action=${action} enable=${mode} edge=${edge}"
     $netsh_command_back = "${allow_context} remoteip=\"${remote_ip}\""
     if $fw_action == 'delete' and $program == undef {
-      $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name} ${netsh_command_shared} ${netsh_command_back}"
-      $netsh_update_command = "${netsh_command_front} set ${netsh_command_rule_name} new ${netsh_command_shared} ${netsh_command_back}"
+      $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_shared} ${netsh_command_back}"
     } else {
-      $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_rule_name} ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
-      $netsh_update_command = "${netsh_command_front} set ${netsh_command_rule_name} new ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
+      $netsh_command = "${netsh_command_front} ${fw_action} ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
+      $netsh_delete_command = "${netsh_command_front} delete ${netsh_command_shared} ${netsh_command_program} ${netsh_command_back}"
     }
     #
-    exec { "set rule ${display_name}":
-      command    => $netsh_command,
-      provider   => windows,
-      onlyif     => $onlyif,
-      unless     => $unless,
-    }
     registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules':
       ensure => present,
     }
@@ -189,10 +181,16 @@ define windows_firewall::exception(
       type   => string,
       data   => $netsh_update_command,
     }
-    ~> exec { "update rule ${display_name}":
-      command     => $netsh_update_command,
+    ~> exec { "clean up existing rule ${display_name}":
+      command     => $netsh_delete_command,
       provider    => windows,
       refreshonly => true,
       onlyif      => $check_rule_existance,
+    }
+    exec { "set rule ${display_name}":
+      command    => $netsh_command,
+      provider   => windows,
+      onlyif     => $onlyif,
+      unless     => $unless,
     }
 }
