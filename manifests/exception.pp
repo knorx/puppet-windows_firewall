@@ -177,17 +177,17 @@ define windows_firewall::exception(
       $netsh_delete_command = "${netsh_command_front} delete ${netsh_command_rule_name}"
     }
     #
-    registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules':
+    ensure_resource('registry_key', 'HKLM\Software\Puppet Labs\Puppet\modules', {
       ensure => present,
-    }
-    ~> registry_key { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall':
+    })
+    ~> ensure_resource('registry_key', 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall', {
       ensure => $ensure,
-    }
-    ~> registry_value { 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall\netsh_command':
+    })
+    ~> ensure_resource('registry_value', 'HKLM\Software\Puppet Labs\Puppet\modules\windows_firewall\netsh_command', {
       ensure => $ensure,
       type   => string,
       data   => $netsh_command,
-    }
+    })
     ~> exec { "clean up existing rule ${display_name}":
       command     => $netsh_delete_command,
       provider    => windows,
